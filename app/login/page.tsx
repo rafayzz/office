@@ -22,7 +22,10 @@ export default function LoginPage() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const idToken = await userCredential.user.getIdToken();
-      await createSession(idToken);
+      const sessionResult = await createSession(idToken);
+      if (!sessionResult.success) {
+        throw new Error(sessionResult.error || 'Server session creation failed');
+      }
       router.push(targetRoute);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to login');
