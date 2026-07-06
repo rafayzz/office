@@ -34,8 +34,8 @@ export async function createSession(idToken: string) {
       success: true,
       uid: decoded.uid,
       email: decoded.email || null,
-      role: (decoded as any).role || null,
-      status: (decoded as any).status || null,
+      role: (decoded as Record<string, unknown>).role || null,
+      status: (decoded as Record<string, unknown>).status || null,
     };
   } catch (error: unknown) {
     const message =
