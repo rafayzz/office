@@ -148,8 +148,8 @@ export async function createAssetFromForm(formData: FormData) {
     if (assignedEmployeeId) await writeAuditLog(actor.uid, actor.name || actor.email || 'Admin', 'asset assigned', 'assets', ref.id);
     revalidatePath('/admin/assets');
     redirect(`/admin/assets/${ref.id}`);
-  } catch (error: any) {
-    if (error?.message === 'NEXT_REDIRECT' || error?.digest?.startsWith('NEXT_REDIRECT')) {
+  } catch (error: unknown) {
+    if ((error as Error)?.message === 'NEXT_REDIRECT' || String((error as Record<string, unknown>)?.digest || '').startsWith('NEXT_REDIRECT')) {
       throw error;
     }
     const msg = error instanceof Error ? error.message : String(error);
