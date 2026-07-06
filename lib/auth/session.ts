@@ -26,7 +26,7 @@ export async function verifySession(): Promise<SessionUser> {
   let decoded;
   try {
     decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
-  } catch (error) {
+  } catch {
     redirect('/login');
   }
   const profileSnap = await adminDb.collection('users').doc(decoded.uid).get();
