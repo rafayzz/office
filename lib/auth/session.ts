@@ -23,7 +23,12 @@ export async function verifySession(): Promise<SessionUser> {
 
   if (!sessionCookie) throw new Error('Missing session');
 
-  const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
+  let decoded;
+  try {
+    decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
+  } catch (error) {
+    redirect('/login');
+  }
   const profileSnap = await adminDb.collection('users').doc(decoded.uid).get();
   const profile = profileSnap.exists ? profileSnap.data() : null;
 
@@ -52,13 +57,13 @@ export async function requireActiveUser() {
 
 export async function requireAdmin() {
   const user = await requireActiveUser();
-  if (user.role !== 'admin') throw new Error('Admin access required');
+  if (user.role !== 'admin') redirect('/employee/dashboard');
   return user;
 }
 
 export async function requireEmployee() {
   const user = await requireActiveUser();
-  if (user.role !== 'employee') throw new Error('Employee access required');
+  if (user.role !== 'employee') redirect('/admin/dashboard');
   return user;
 }
 
