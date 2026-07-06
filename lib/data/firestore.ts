@@ -19,9 +19,6 @@ function toIso(value: unknown): string {
   return String(value);
 }
 
-function docData<T>(doc: FirestoreDoc): T {
-  return { id: doc.id, ...doc.data() } as T;
-}
 
 function normalizeEmployee(doc: FirestoreDoc): Employee {
   const data = doc.data() || {};

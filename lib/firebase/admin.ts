@@ -15,6 +15,7 @@ function getPrivateKey() {
 }
 
 function getAdminApp(): App {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { cert, getApps, initializeApp } = require('firebase-admin/app') as AdminAppModule;
   if (getApps().length) return getApps()[0];
 
@@ -43,21 +44,25 @@ function lazyProxy<T extends object>(factory: () => T): T {
 }
 
 export function getAdminFieldValue(): AdminFirestoreModule['FieldValue'] {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { FieldValue } = require('firebase-admin/firestore') as AdminFirestoreModule;
   return FieldValue;
 }
 
 export const adminAuth = lazyProxy<Auth>(() => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { getAuth } = require('firebase-admin/auth') as AdminAuthModule;
   return getAuth(getAdminApp());
 });
 
 export const adminDb = lazyProxy<Firestore>(() => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { getFirestore } = require('firebase-admin/firestore') as AdminFirestoreModule;
   return getFirestore(getAdminApp());
 });
 
 export const adminStorage = lazyProxy<Storage>(() => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { getStorage } = require('firebase-admin/storage') as AdminStorageModule;
   return getStorage(getAdminApp());
 });

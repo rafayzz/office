@@ -6,7 +6,6 @@ import {
   ClipboardCheck,
   Command,
   FileBarChart2,
-  Gauge,
   HardDrive,
   KeyRound,
   Laptop,
@@ -52,11 +51,9 @@ const visualMap: Record<VisualName, { icon: LucideIcon; gradient: string; glow: 
 
 export function Visual({
   name,
-  alt: _alt,
   size = 40,
   className,
-  imageClassName,
-  priority: _priority = false
+  imageClassName
 }: {
   name: VisualName;
   alt?: string;
