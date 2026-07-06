@@ -58,7 +58,9 @@ export const adminAuth = lazyProxy<Auth>(() => {
 export const adminDb = lazyProxy<Firestore>(() => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { getFirestore } = require('firebase-admin/firestore') as AdminFirestoreModule;
-  return getFirestore(getAdminApp());
+  const db = getFirestore(getAdminApp());
+  db.settings({ ignoreUndefinedProperties: true });
+  return db;
 });
 
 export const adminStorage = lazyProxy<Storage>(() => {
