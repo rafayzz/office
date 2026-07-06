@@ -34,11 +34,12 @@ function getAdminApp(): App {
 }
 
 function lazyProxy<T extends object>(factory: () => T): T {
+  let cachedInstance: T | null = null;
   return new Proxy({} as T, {
     get(_target, property, receiver) {
-      const instance = factory();
-      const value = Reflect.get(instance, property, receiver);
-      return typeof value === 'function' ? value.bind(instance) : value;
+      if (!cachedInstance) cachedInstance = factory();
+      const value = Reflect.get(cachedInstance, property, receiver);
+      return typeof value === 'function' ? value.bind(cachedInstance) : value;
     }
   });
 }
