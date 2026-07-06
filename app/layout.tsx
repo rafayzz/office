@@ -1,20 +1,15 @@
 import type { Metadata } from 'next';
-import { Toaster } from 'sonner';
 import './globals.css';
-
 
 export const metadata: Metadata = {
   title: 'OfficeOS',
-  description: 'Premium internal office management dashboard'
+  description: 'A modern workspace operations dashboard.'
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>
-        {children}
-        <Toaster richColors position="top-right" />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

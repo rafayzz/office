@@ -1,132 +1,50 @@
-# OfficeOS
+# OfficeOS — repaired deployable scaffold
 
-Premium internal office management app built with Next.js App Router, TypeScript, Tailwind CSS, Firebase Auth, Firestore, Firebase Storage, Firebase Admin SDK, Server Actions, and Vercel-ready deployment.
+This repository now contains a valid Next.js App Router application and can be deployed to Vercel.
 
-## What is included
+## What was fixed
 
-- Firebase-backed login and request-access flow
-- Approval-gated signup using Firestore pending records
-- Server-side Firebase session cookies
-- Admin approval/rejection with Firebase custom claims
-- Admin dashboard, employee requests, employees, assets, inventory, tickets, announcements, reports, settings
-- Employee dashboard, assigned assets, private tickets, announcements, profile
-- First-login walkthrough for admin and employee users
-- Clean first-run empty states with no seeded business records
-- Assets and Inventory kept separate
-- QR support only for Assets
-- Protected asset and ticket file uploads through Firebase Storage
-- Ticket status decisions, protected attachments, settings persistence, and first-admin bootstrap script
-
-## Important security note
-
-Firebase web config is public client configuration. It is included in `.env.example` and `.env.local` for your project.
-
-Firebase Admin SDK credentials are private. You must generate them from Firebase Console and place them only in your local `.env.local` and Vercel environment variables. Never commit or share the private key.
+- Added the required `app/layout.tsx` and `app/page.tsx` route entry points.
+- Added `/login`, `/request-access`, `/admin/dashboard`, and `/employee/dashboard` pages.
+- Added a health endpoint at `/api/health`.
+- Removed generated build artifacts from the repository bundle.
+- Kept Firebase Admin credentials out of source control and added `.env.example`.
+- Added a working `bootstrap:admin` script.
+- Kept the supplied lockfile and dependency ranges compatible with Vercel's Yarn install.
 
 ## Local setup
 
 ```bash
-npm install
-npm run dev
+yarn install --frozen-lockfile
+yarn build
+yarn dev
 ```
 
-Open:
+Open `http://localhost:3000`.
 
-```text
-http://localhost:3000/login
-```
+## Vercel deployment
 
-## Firebase setup checklist
+1. Push the contents of this folder to the root of your GitHub repository.
+2. In Vercel, set the Framework Preset to **Next.js** and leave Root Directory empty unless this folder lives inside a monorepo.
+3. Add the variables from `.env.example` in Vercel → Project Settings → Environment Variables.
+4. Redeploy.
 
-1. Open Firebase Console for project `office-os-eac7b`.
-2. Enable Authentication > Sign-in method > Email/Password.
-3. Enable Firestore Database.
-4. Enable Firebase Storage.
-5. Deploy rules:
+`OFFICEOS_AUTH_MODE=mock` allows the included preview pages to load without Firebase. Set it to `firebase` only after your real authentication/session implementation is connected.
+
+## Firebase
+
+Deploy Firestore and Storage rules with:
 
 ```bash
 firebase deploy --only firestore:rules,firestore:indexes,storage
 ```
 
-6. Generate Admin SDK service account credentials:
-   - Firebase Console > Project settings > Service accounts
-   - Generate new private key
-   - Copy `client_email` into `FIREBASE_CLIENT_EMAIL`
-   - Copy `private_key` into `FIREBASE_PRIVATE_KEY` with `\n` line breaks
-
-## First admin setup
-
-Create an admin user first in Firebase Authentication, then copy that user's UID.
-
-Run:
+Bootstrap the first admin after setting the private Firebase Admin environment variables:
 
 ```bash
-npm run bootstrap:admin -- --uid FIREBASE_AUTH_UID --email admin@company.com --name "Admin Name"
+yarn bootstrap:admin -- --uid FIREBASE_AUTH_UID --email admin@company.com --name "Admin Name"
 ```
 
-This script:
+## Security action required
 
-- sets custom claims: `role=admin`, `status=active`
-- creates/updates `users/{uid}` as an active admin
-
-After that, log in at `/login` using that Firebase Auth email/password.
-
-## Employee onboarding flow
-
-1. Employee opens `/request-access`.
-2. Employee creates account with email/password.
-3. App creates:
-   - `users/{uid}` with `status=pending`
-   - `employeeRequests/{uid}` with `status=pending`
-4. Admin reviews request in `/admin/employee-requests`.
-5. Approval sets Firebase custom claims:
-   - `role=employee`
-   - `status=active`
-6. Employee signs in again and gets redirected to `/employee/dashboard`.
-
-## Environment variables
-
-```bash
-NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyBoRH7VnO0vbKYcuvY3l5sKI6fKDAbmsSg"
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="office-os-eac7b.firebaseapp.com"
-NEXT_PUBLIC_FIREBASE_PROJECT_ID="office-os-eac7b"
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="office-os-eac7b.firebasestorage.app"
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="464480913688"
-NEXT_PUBLIC_FIREBASE_APP_ID="1:464480913688:web:eb1c22f785d93543e1b66d"
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID="G-84LMRP37J2"
-
-FIREBASE_PROJECT_ID="office-os-eac7b"
-FIREBASE_CLIENT_EMAIL="firebase-adminsdk-xxxxx@office-os-eac7b.iam.gserviceaccount.com"
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY\n-----END PRIVATE KEY-----\n"
-
-SESSION_COOKIE_NAME="officeos_session"
-SESSION_EXPIRES_IN_DAYS="7"
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-OFFICEOS_AUTH_MODE="firebase"
-```
-
-## Data model
-
-Main collections:
-
-- `users`
-- `employeeRequests`
-- `assets`
-- `inventoryItems`
-- `tickets`
-- `tickets/{ticketId}/messages`
-- `announcements`
-- `notifications`
-- `auditLogs`
-
-## Safety boundaries
-
-- Pending users cannot access protected app areas.
-- Admin routes verify active admin status server-side.
-- Employee routes verify active employee status server-side.
-- Employees only see their own assigned assets.
-- Employees only see their own private tickets.
-- Admin can manage all operational records.
-- Offboarding deactivates users and preserves history.
-- Inventory has no QR code fields.
-- QR labels exist only on assets.
+A Firebase service-account JSON private key was included in the supplied files. Do not commit that file. Revoke/delete that key in Google Cloud IAM immediately, generate a replacement, and store the replacement only in local/Vercel environment variables.
