@@ -1,0 +1,23 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() { return request.auth != null; }
+    function active() { return signedIn() && request.auth.token.status == 'active'; }
+    function admin() { return active() && request.auth.token.role == 'admin'; }
+    function employee() { return active() && request.auth.token.role == 'employee'; }
+
+    match /assets/{assetId}/{allPaths=**} {
+      allow read, write: if admin();
+    }
+
+    match /tickets/{ticketId}/{ownerUid}/{fileName} {
+      allow read: if admin() || (employee() && ownerUid == request.auth.uid);
+      allow write: if admin() || (employee() && ownerUid == request.auth.uid);
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,86 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function active() { return signedIn() && request.auth.token.status == 'active'; }
+    function admin() { return active() && request.auth.token.role == 'admin'; }
+    function employee() { return active() && request.auth.token.role == 'employee'; }
+    function owner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    match /users/{uid} {
+      allow create: if owner(uid)
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.role == 'employee'
+        && request.resource.data.status == 'pending';
+      allow read: if admin() || owner(uid);
+      allow update: if admin() || (
+        owner(uid)
+        && resource.data.status == 'pending'
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly(['name', 'department', 'title', 'phone', 'location', 'manager', 'updatedAt'])
+      );
+      allow delete: if false;
+    }
+
+    match /employeeRequests/{requestId} {
+      allow create: if signedIn()
+        && requestId == request.auth.uid
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.roleRequested == 'employee';
+      allow read: if admin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow update, delete: if admin();
+    }
+
+    match /assets/{assetId} {
+      allow read: if admin() || (employee() && resource.data.assignedEmployeeId == request.auth.uid);
+      allow create, update, delete: if admin();
+    }
+
+    match /assetAssignments/{assignmentId} {
+      allow read: if admin() || (employee() && resource.data.employeeId == request.auth.uid);
+      allow write: if admin();
+    }
+
+    match /inventoryItems/{itemId} {
+      allow read, write: if admin();
+    }
+
+    match /tickets/{ticketId} {
+      allow create: if active()
+        && request.resource.data.creatorId == request.auth.uid
+        && request.resource.data.status == 'Open';
+      allow read: if admin() || (employee() && resource.data.creatorId == request.auth.uid);
+      allow update: if admin() || (employee() && resource.data.creatorId == request.auth.uid);
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if admin() || (employee() && get(/databases/$(database)/documents/tickets/$(ticketId)).data.creatorId == request.auth.uid);
+        allow create: if active()
+          && (admin() || get(/databases/$(database)/documents/tickets/$(ticketId)).data.creatorId == request.auth.uid)
+          && request.resource.data.authorUid == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+
+    match /announcements/{announcementId} {
+      allow read: if admin() || (active() && resource.data.status == 'Published');
+      allow create, update, delete: if admin();
+    }
+
+    match /notifications/{notificationId} {
+      allow read, update: if admin() || (active() && resource.data.userId == request.auth.uid);
+      allow create, delete: if admin();
+    }
+
+
+    match /settings/{settingId} {
+      allow read, write: if admin();
+    }
+
+    match /auditLogs/{auditId} {
+      allow read: if admin();
+      allow write: if false;
+    }
+  }
+}
