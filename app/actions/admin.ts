@@ -103,13 +103,13 @@ export async function createAssetFromForm(formData: FormData) {
       assetId: value(formData, 'assetId'),
       serialNumber: value(formData, 'serialNumber'),
       model: value(formData, 'model'),
-      specs: value(formData, 'specs'),
+      specs: value(formData, 'specs') || null,
       purchaseDate: value(formData, 'purchaseDate'),
       warrantyEndDate: value(formData, 'warrantyEndDate'),
       condition: value(formData, 'condition'),
       status: assignedEmployeeId ? 'Assigned' : value(formData, 'status'),
       location: value(formData, 'location'),
-      assignedEmployeeId: assignedEmployeeId || undefined,
+      assignedEmployeeId: assignedEmployeeId || null,
       qrEnabled: boolValue(formData, 'qrEnabled')
     });
 
@@ -167,7 +167,7 @@ export async function createInventoryItemFromForm(formData: FormData) {
     location: value(formData, 'location'),
     reorderLevel: value(formData, 'reorderLevel'),
     condition: value(formData, 'condition'),
-    notes: value(formData, 'notes')
+    notes: value(formData, 'notes') || null
   });
 
   const ref = await adminDb.collection('inventoryItems').add({

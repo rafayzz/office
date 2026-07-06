@@ -13,13 +13,13 @@ export const assetSchema = z.object({
   assetId: z.string().min(3),
   serialNumber: z.string().min(3),
   model: z.string().min(2),
-  specs: z.string().optional(),
+  specs: z.string().nullish(),
   purchaseDate: z.string(),
   warrantyEndDate: z.string(),
   condition: z.enum(['Excellent', 'Good', 'Fair', 'Needs repair']),
   status: z.enum(['Available', 'Assigned', 'Maintenance', 'Retired']),
   location: z.string().min(2),
-  assignedEmployeeId: z.string().optional(),
+  assignedEmployeeId: z.string().nullish(),
   qrEnabled: z.boolean().default(false)
 });
 
@@ -31,7 +31,7 @@ export const inventorySchema = z.object({
   location: z.string().min(2),
   reorderLevel: z.coerce.number().int().min(0),
   condition: z.enum(['New', 'Good', 'Usable', 'Damaged']),
-  notes: z.string().optional()
+  notes: z.string().nullish()
 });
 
 export const ticketSchema = z.object({
