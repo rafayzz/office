@@ -9,12 +9,19 @@ import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { listEmployeesForAssignment } from '@/lib/data/firestore';
 
-export default async function NewAssetPage() {
+export default async function NewAssetPage(props: { searchParams?: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const searchParams = await props.searchParams;
+  const errorParam = searchParams?.error;
   const employees = await listEmployeesForAssignment();
   return (
     <>
       <Button asChild variant="ghost" className="px-0"><Link href="/admin/assets"><ArrowLeft className="h-4 w-4" /> Back to assets</Link></Button>
       <PageHeader eyebrow="Create asset" visual="assets" title="Add a trackable asset" description="Use this form for serialized company assets only. General office stock belongs in Inventory." />
+      {errorParam && (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600 font-mono overflow-auto">
+          <strong>Error submitting form:</strong> {String(errorParam)}
+        </div>
+      )}
       <form action={createAssetFromForm} className="grid gap-5 lg:grid-cols-[1fr_360px]">
         <FormSection title="Asset details" description="Individually trackable item with serial and assignment history.">
           <div className="grid gap-4 sm:grid-cols-2">

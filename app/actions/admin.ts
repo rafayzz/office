@@ -87,66 +87,74 @@ export async function rejectEmployeeRequest(requestId: string) {
 }
 
 export async function createAssetFromForm(formData: FormData) {
-  const actor = await requireAdmin();
-  const assignedEmployeeId = value(formData, 'assignedEmployeeId');
-  let assignedEmployeeName = '';
+  try {
+    const actor = await requireAdmin();
+    const assignedEmployeeId = value(formData, 'assignedEmployeeId');
+    let assignedEmployeeName = '';
 
-  if (assignedEmployeeId) {
-    const employee = await adminDb.collection('users').doc(assignedEmployeeId).get();
-    assignedEmployeeName = employee.data()?.name || employee.data()?.email || '';
+    if (assignedEmployeeId) {
+      const employee = await adminDb.collection('users').doc(assignedEmployeeId).get();
+      assignedEmployeeName = employee.data()?.name || employee.data()?.email || '';
+    }
+
+    const parsed = assetSchema.parse({
+      name: value(formData, 'name'),
+      type: value(formData, 'type'),
+      assetId: value(formData, 'assetId'),
+      serialNumber: value(formData, 'serialNumber'),
+      model: value(formData, 'model'),
+      specs: value(formData, 'specs'),
+      purchaseDate: value(formData, 'purchaseDate'),
+      warrantyEndDate: value(formData, 'warrantyEndDate'),
+      condition: value(formData, 'condition'),
+      status: assignedEmployeeId ? 'Assigned' : value(formData, 'status'),
+      location: value(formData, 'location'),
+      assignedEmployeeId: assignedEmployeeId || undefined,
+      qrEnabled: boolValue(formData, 'qrEnabled')
+    });
+
+    const assignmentHistory = assignedEmployeeId
+      ? [
+          {
+            id: crypto.randomUUID(),
+            employeeId: assignedEmployeeId,
+            employeeName: assignedEmployeeName,
+            assignedAt: new Date().toISOString(),
+            notes: value(formData, 'assignmentNote') || 'Initial assignment'
+          }
+        ]
+      : [];
+
+    const ref = adminDb.collection('assets').doc();
+    const [invoice, warranty] = await Promise.all([
+      uploadFormFile(formData.get('invoiceFile'), `assets/${ref.id}/documents`),
+      uploadFormFile(formData.get('warrantyFile'), `assets/${ref.id}/documents`)
+    ]);
+
+    await ref.set({
+      ...parsed,
+      assignedEmployeeName: assignedEmployeeName || null,
+      assignmentHistory,
+      invoiceFilePath: invoice?.path || null,
+      invoiceFileName: invoice?.name || null,
+      warrantyFilePath: warranty?.path || null,
+      warrantyFileName: warranty?.name || null,
+      createdAt: getAdminFieldValue().serverTimestamp(),
+      updatedAt: getAdminFieldValue().serverTimestamp(),
+      createdBy: actor.uid
+    });
+
+    await writeAuditLog(actor.uid, actor.name || actor.email || 'Admin', 'asset created', 'assets', ref.id);
+    if (assignedEmployeeId) await writeAuditLog(actor.uid, actor.name || actor.email || 'Admin', 'asset assigned', 'assets', ref.id);
+    revalidatePath('/admin/assets');
+    redirect(`/admin/assets/${ref.id}`);
+  } catch (error: any) {
+    if (error?.message === 'NEXT_REDIRECT' || error?.digest?.startsWith('NEXT_REDIRECT')) {
+      throw error;
+    }
+    const msg = error instanceof Error ? error.message : String(error);
+    redirect(`/admin/assets/new?error=${encodeURIComponent(msg)}`);
   }
-
-  const parsed = assetSchema.parse({
-    name: value(formData, 'name'),
-    type: value(formData, 'type'),
-    assetId: value(formData, 'assetId'),
-    serialNumber: value(formData, 'serialNumber'),
-    model: value(formData, 'model'),
-    specs: value(formData, 'specs'),
-    purchaseDate: value(formData, 'purchaseDate'),
-    warrantyEndDate: value(formData, 'warrantyEndDate'),
-    condition: value(formData, 'condition'),
-    status: assignedEmployeeId ? 'Assigned' : value(formData, 'status'),
-    location: value(formData, 'location'),
-    assignedEmployeeId: assignedEmployeeId || undefined,
-    qrEnabled: boolValue(formData, 'qrEnabled')
-  });
-
-  const assignmentHistory = assignedEmployeeId
-    ? [
-        {
-          id: crypto.randomUUID(),
-          employeeId: assignedEmployeeId,
-          employeeName: assignedEmployeeName,
-          assignedAt: new Date().toISOString(),
-          notes: value(formData, 'assignmentNote') || 'Initial assignment'
-        }
-      ]
-    : [];
-
-  const ref = adminDb.collection('assets').doc();
-  const [invoice, warranty] = await Promise.all([
-    uploadFormFile(formData.get('invoiceFile'), `assets/${ref.id}/documents`),
-    uploadFormFile(formData.get('warrantyFile'), `assets/${ref.id}/documents`)
-  ]);
-
-  await ref.set({
-    ...parsed,
-    assignedEmployeeName: assignedEmployeeName || null,
-    assignmentHistory,
-    invoiceFilePath: invoice?.path || null,
-    invoiceFileName: invoice?.name || null,
-    warrantyFilePath: warranty?.path || null,
-    warrantyFileName: warranty?.name || null,
-    createdAt: getAdminFieldValue().serverTimestamp(),
-    updatedAt: getAdminFieldValue().serverTimestamp(),
-    createdBy: actor.uid
-  });
-
-  await writeAuditLog(actor.uid, actor.name || actor.email || 'Admin', 'asset created', 'assets', ref.id);
-  if (assignedEmployeeId) await writeAuditLog(actor.uid, actor.name || actor.email || 'Admin', 'asset assigned', 'assets', ref.id);
-  revalidatePath('/admin/assets');
-  redirect(`/admin/assets/${ref.id}`);
 }
 
 export async function createInventoryItemFromForm(formData: FormData) {
