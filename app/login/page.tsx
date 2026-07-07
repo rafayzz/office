@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Building2 } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
 import { createSession } from '@/app/actions/auth';
@@ -37,7 +38,7 @@ export default function LoginPage() {
   return (
     <main className="auth-wrap">
       <section className="auth-card">
-        <Link className="brand" href="/"><span className="brand-mark">O</span><span>OfficeOS</span></Link>
+        <Link className="brand" href="/"><span className="brand-mark"><Building2 size={20} /></span><span>OfficeOS</span></Link>
         <h1>Welcome back</h1>
         <p>Sign in with your approved workspace account.</p>
         <form onSubmit={(e) => handleLogin(e, '/employee/dashboard')}>

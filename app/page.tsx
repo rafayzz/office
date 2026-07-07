@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Building2 } from 'lucide-react';
 
 export default function HomePage() {
   return (
@@ -6,7 +7,7 @@ export default function HomePage() {
       <div className="shell">
         <nav className="nav" aria-label="Main navigation">
           <Link className="brand" href="/">
-            <span className="brand-mark">O</span>
+            <span className="brand-mark"><Building2 size={20} /></span>
             <span>OfficeOS</span>
           </Link>
           <div className="nav-links">

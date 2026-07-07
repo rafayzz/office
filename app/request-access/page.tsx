@@ -1,10 +1,11 @@
 import Link from 'next/link';
+import { Building2 } from 'lucide-react';
 
 export default function RequestAccessPage() {
   return (
     <main className="auth-wrap">
       <section className="auth-card">
-        <Link className="brand" href="/"><span className="brand-mark">O</span><span>OfficeOS</span></Link>
+        <Link className="brand" href="/"><span className="brand-mark"><Building2 size={20} /></span><span>OfficeOS</span></Link>
         <h1>Request access</h1>
         <p>Send your details to the workspace administrator for approval.</p>
         <form>
