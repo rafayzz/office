@@ -56,11 +56,22 @@ export const adminAuth = lazyProxy<Auth>(() => {
   return getAuth(getAdminApp());
 });
 
+const globalForFirestore = globalThis as unknown as { firestoreSettingsApplied?: boolean };
+
 export const adminDb = lazyProxy<Firestore>(() => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { getFirestore } = require('firebase-admin/firestore') as AdminFirestoreModule;
   const db = getFirestore(getAdminApp());
-  db.settings({ ignoreUndefinedProperties: true });
+  
+  if (!globalForFirestore.firestoreSettingsApplied) {
+    try {
+      db.settings({ ignoreUndefinedProperties: true });
+      globalForFirestore.firestoreSettingsApplied = true;
+    } catch (e) {
+      // Ignore if settings were already applied by a previous HMR cycle
+    }
+  }
+  
   return db;
 });
 
