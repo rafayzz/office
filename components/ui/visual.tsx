@@ -26,7 +26,7 @@ import { cn } from '@/lib/utils';
 import type { VisualName } from '@/lib/visuals';
 
 const visualMap: Record<VisualName, { icon: LucideIcon; gradient: string; glow: string }> = {
-  logo: { icon: Sparkles, gradient: 'from-slate-950 via-slate-800 to-amber-500', glow: 'bg-amber-300/45' },
+  logo: { icon: Building2, gradient: 'from-slate-950 via-slate-800 to-amber-500', glow: 'bg-amber-300/45' },
   dashboard: { icon: LayoutDashboard, gradient: 'from-slate-950 via-slate-800 to-sky-500', glow: 'bg-sky-300/35' },
   requests: { icon: ClipboardCheck, gradient: 'from-slate-950 via-indigo-900 to-violet-500', glow: 'bg-violet-300/35' },
   employees: { icon: UsersRound, gradient: 'from-slate-950 via-sky-900 to-cyan-500', glow: 'bg-cyan-300/35' },
