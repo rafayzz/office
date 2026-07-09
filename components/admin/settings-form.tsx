@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/form-section';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
-import { Visual } from '@/components/ui/visual';
 import type { WorkspaceSettings } from '@/lib/types';
+
 
 type ActionState = { ok: boolean; message: string } | null;
 
@@ -59,16 +59,7 @@ export function SettingsForm({ settings, lastUpdated }: { settings: WorkspaceSet
         </Field>
       </div>
 
-      {/* Security info block */}
-      <div className="rounded-3xl border border-slate-950/10 bg-slate-950 p-4 text-sm text-white shadow-[0_18px_50px_rgba(15,23,42,0.18)]">
-        <div className="flex items-start gap-3">
-          <Visual name="security" alt="" size={42} className="rounded-2xl ring-white/10" />
-          <div>
-            <p className="font-semibold">Production-safe workspace</p>
-            <p className="mt-1 text-white/65">The interface stays client-ready while secure roles, private tickets, protected files, and asset history remain enforced server-side.</p>
-          </div>
-        </div>
-      </div>
+
 
       {/* Save feedback banner */}
       {state && (

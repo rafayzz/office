@@ -49,16 +49,7 @@ export function Sidebar({ variant }: { variant: 'admin' | 'employee' }) {
           })}
         </nav>
 
-        <div className="relative overflow-hidden rounded-[1.75rem] border border-slate-950/10 bg-slate-950 p-4 text-white shadow-[0_18px_50px_rgba(15,23,42,0.20)]">
-          <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
-          <div className="relative flex items-center gap-3">
-            <Visual name="security" alt="Security" size={42} className="rounded-2xl ring-white/10" />
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">Secure workspace</p>
-              <p className="mt-1 text-sm font-medium leading-5 text-white/90">Role-based access, private tickets, and asset history stay separated.</p>
-            </div>
-          </div>
-        </div>
+
       </div>
     </aside>
   );
