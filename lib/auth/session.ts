@@ -32,8 +32,10 @@ export async function verifySession(): Promise<SessionUser> {
   const profileSnap = await adminDb.collection('users').doc(decoded.uid).get();
   const profile = profileSnap.exists ? profileSnap.data() : null;
 
-  const role = (decoded.role || profile?.role || 'employee') as UserRole;
-  const status = (decoded.status || profile?.status || 'pending') as UserStatus;
+  // Prefer Firestore profile over stale JWT claims — Firestore is updated immediately
+  // when admin approves/rejects, while the JWT is only refreshed on next login.
+  const role = (profile?.role || decoded.role || 'employee') as UserRole;
+  const status = (profile?.status || decoded.status || 'pending') as UserStatus;
 
   return {
     uid: decoded.uid,

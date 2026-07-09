@@ -41,6 +41,9 @@ export async function approveEmployeeRequest(requestId: string, uid: string) {
   const requestData = request.data();
 
   await adminAuth.setCustomUserClaims(uid, { role: 'employee', status: 'active', employeeId: uid });
+  // Revoke existing sessions so the stale session cookie (which still has 'pending' status)
+  // is invalidated. The Firestore profile is now the source of truth for status.
+  try { await adminAuth.revokeRefreshTokens(uid); } catch { /* non-fatal */ }
   await adminDb.collection('users').doc(uid).set(
     {
       uid,
